@@ -1,0 +1,28 @@
+							 README
+
+					Eigen Digits Classification
+
+						Name: Kunal Lad
+						UT Eid: KL28697
+					Email: kunal.lad@utexas.edu
+
+Steps to run the code:
+
+1) Unzip the zip folder.
+
+2) Make the unzipped folder as your current folder in Matlab.
+
+3) In command window run the following command:
+   main
+
+Main Functions :
+
+1) hw1FindEigenDigits : Returns the mean of sample data and the normalized eigen vectors.
+
+2) constructImage : Takes an array of 784 dimensional feature vectors, projects it onto a basis and constructs a concatenated image comprising of all the projections.
+
+3) findPrincipalComponents : Finds top k principal components. We had also implemented another version which finds top k (unknown) components such that their eigen values compries of a predefined fraction of total energy.
+
+4) training : Trains a kNN model from the sample data
+
+5) test : Tests the data using the passed model and returns the accuray.

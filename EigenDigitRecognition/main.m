@@ -10,37 +10,69 @@ easyImages = testImages(:, 5001:end);
 easyLabels = testLabels(:, 5001:end);
 
 % Find eigen basis.
-% k = 500;
+% k = 100;    
 
 easyAccuracy = zeros(50, 1);
 hardAccuracy = zeros(50, 1);
-numSamples = [10:10:500];
+
+% Uncomment below statements when you want to use both euclidean and cosine
+% distance based models.
+% easyAccuracy2 = zeros(50, 1);
+% hardAccuracy2 = zeros(50, 1);
+
+SampleSizes = [10:10:500];
 i = 0;
-for k = numSamples
+for k = SampleSizes
     i = i+1;
-    [A, Indices] = datasample(trainImages, k, 2, 'Replace', false);
-    [ANorm, AMu, V, D] = hw1FindEigendigits(A);
+[A, Indices] = datasample(trainImages, k, 2, 'Replace', false);
+trainingLabels = trainLabels(Indices);
+[ANorm, AMu, V, D] = hw1FindEigendigits(A);
 
+% Uncomment below statement when iterating over numComponents and change 
+% 1. size of Accuracy vectors defined above.
+% 2. for loop variable to numComponents.
+% Y = V; E = D; Components = [10:10:500]
+
+% Uncomment below statements when you want to iterate over neighbors and 
+% change the following:
+% 1. size of Accuracy vectors defined above.
+% 2. for loop variable to numNeighbors.
+% Neighbors = [1:20];
+
+% i = 0;
+% for numComponents = Components
+%     i = i+1;
     % Select Principal Components.
-    % [V, D] = findPrincipalComponents(V, D, 0.99);
+    % [V, D] = findPrincipalComponents(Y, E, numComponents);
 
-    % Train model
+    % Train models
     distance = 'cosine';
-    numNeighbors = 1;
-    model = training(trainLabels(Indices), ANorm, V, numNeighbors, distance);
+    model = training(trainingLabels, ANorm, V, numNeighbors, distance);
+    % distance = 'euclidean';
+    % model2 = training(trainingLabels, ANorm, V, numNeighbors, distance);
 
     % Test
-    samples = 1000;
+    testSamples = 100;
     [easyTests, Indices] = ... 
-        datasample(easyImages, samples, 2, 'Replace', false);
+        datasample(easyImages, testSamples, 2, 'Replace', false);
     easyAccuracy(i) = test(easyTests, easyLabels(Indices), model, AMu, V);
+    % easyAccuracy2(i) = test(easyTests, easyLabels(Indices), model2, AMu, V);
 
     [hardTests, Indices] = ...
-        datasample(hardImages, samples, 2, 'Replace', false);
+        datasample(hardImages, testSamples, 2, 'Replace', false);
     hardAccuracy(i) = test(hardTests, hardLabels(Indices), model, AMu, V); 
+    % hardAccuracy2(i) = test(hardTests, hardLabels(Indices), model2, AMu, V); 
 end
 
-figure('name', 'Accuracy vs Traning Data Size');
-plot(numSamples, easyAccuracy, '-ro', numSamples, hardAccuracy, '-.b'),
+figure('name', 'Accuracy Vs Sample Size');
+
+% subplot(2,2,1)
+plot(SampleSizes, easyAccuracy, '-ro', SampleSizes, hardAccuracy, '-.b'),
+xlabel('Number of Samples'), ylabel('Accuray (%)'), 
 legend('Easy', 'Hard'), grid on
+
+% subplot(2,2,2)
+% plot(SampleSizes, easyAccuracy2, '-ro', SampleSizes, hardAccuracy2, '-.b'),
+% xlabel('# Number of Samples'), ylabel('Accuray (%)'), 
+% legend('Easy', 'Hard'), grid on
 
