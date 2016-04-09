@@ -1,0 +1,57 @@
+% Load data.
+load digits.mat;
+
+% Reshape images to column vectors.
+trainImages = reshapeImages(trainImages);
+testImages = reshapeImages(testImages);
+hardImages = testImages(:, 1:5000);
+hardLabels = testLabels(:, 1:5000);
+easyImages = testImages(:, 5001:end);
+easyLabels = testLabels(:, 5001:end);
+
+k = 350;
+[A, ~] = datasample(trainImages, k, 2, 'Replace', false);
+[ANorm, AMu, V, D] = hw1FindEigendigits(A);
+
+easyAccuracy = zeros(10)
+hardAccuracy = zeros(10)
+for trainingSetSize = [100 500 1000 1500 2000 3000 4000 5000 10000 20000]
+i = 
+% trainingSetSize = 100;
+[trainingData, trainingIndices] = ...
+    datasample(trainImages, trainingSetSize, 2, 'Replace', false);
+trainingLabels = trainLabels(trainingIndices);
+
+% params = templateSVM('KernelFunction', 'Polynomial');
+pcaTrainingData = bsxfun(@minus, double(trainingData), AMu);
+pcaTrainingData = double(pcaTrainingData') * V;
+% pcaModel = fitcecoc(pcaTrainingData, trainingLabels', 'Learners', params, 'Coding', 'onevsall');
+pcaModel = fitcecoc(pcaTrainingData, trainingLabels');
+
+% Test
+testSamples = 100;
+[easyTests, Indices] = ... 
+    datasample(easyImages, testSamples, 2, 'Replace', false);
+[pcaEasyAccuracy, pcaEasyPredictedLabels] = pcaTest(easyTests, easyLabels(Indices), pcaModel, AMu, V);
+pcaEasyConfMat = confusionmat(easyLabels(Indices), pcaEasyPredictedLabels);
+easyAccuracy(i) = pcaEasyAccuracy
+
+[hardTests, Indices] = ...
+    datasample(hardImages, testSamples, 2, 'Replace', false);
+[pcaHardAccuracy, pcaHardPredictedLabels] = pcaTest(hardTests, hardLabels(Indices), pcaModel, AMu, V); 
+pcaHardConfMat = confusionmat(hardLabels(Indices), pcaHardPredictedLabels);
+hardAccuaracy(i) = pcaHardAccuracy
+end
+
+% figure('name', 'Accuracy Vs Sample Size');
+
+% subplot(2,2,1)
+% plot(SampleSizes, easyAccuracy, '-ro', SampleSizes, hardAccuracy, '-.b'),
+% xlabel('Number of Samples'), ylabel('Accuray (%)'), 
+% legend('Easy', 'Hard'), grid on
+
+% subplot(2,2,2)
+% plot(SampleSizes, easyAccuracy2, '-ro', SampleSizes, hardAccuracy2, '-.b'),
+% xlabel('# Number of Samples'), ylabel('Accuray (%)'), 
+% legend('Easy', 'Hard'), grid on
+
